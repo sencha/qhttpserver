@@ -30,11 +30,11 @@
 #include "qhttpserverapi.h"
 #include "qhttpserverfwd.h"
 
-#include <QObject>
+#include <QTcpServer>
 #include <QHostAddress>
 
 /// Maps status codes to string reason phrases
-extern QHash<int, QString> STATUS_CODES;
+typedef QHash<int, QString> TStatusCodes;
 
 /// The QHttpServer class forms the basis of the %QHttpServer
 /// project. It is a fast, non-blocking HTTP server.
@@ -53,9 +53,12 @@ extern QHash<int, QString> STATUS_CODES;
 
     helloworld.h
     @include helloworld/helloworld.h */
-class QHTTPSERVER_API QHttpServer : public QObject
+class QHTTPSERVER_API QHttpServer : public QTcpServer
 {
     Q_OBJECT
+
+public:
+    static const TStatusCodes& statusCodes();
 
 public:
     /// Construct a new HTTP Server.
@@ -64,23 +67,12 @@ public:
 
     virtual ~QHttpServer();
 
-    /// Start the server by bounding to the given @c address and @c port.
-    /** @note This function returns immediately, it does not block.
-        @param address Address on which to listen to. Default is to listen on
-        all interfaces which means the server can be accessed from anywhere.
-        @param port Port number on which the server should run.
-        @return True if the server was started successfully, false otherwise.
-        @sa listen(quint16) */
-    bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 80);
-
     /// Starts the server on @c port listening on all interfaces.
     /** @param port Port number on which the server should run.
         @return True if the server was started successfully, false otherwise.
         @sa listen(const QHostAddress&, quint16) */
     bool listen(quint16 port);
 
-    /// Stop the server and listening for new connections.
-    void close();
 Q_SIGNALS:
     /// Emitted when a client makes a new request to the server.
     /** The slot should use the given @c request and @c response
@@ -92,9 +84,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void newConnection();
-
-private:
-    QTcpServer *m_tcpServer;
 };
 
 #endif

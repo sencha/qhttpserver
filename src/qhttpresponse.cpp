@@ -134,7 +134,7 @@ void QHttpResponse::writeHead(int status)
     }
 
     m_connection->write(
-        QString("HTTP/1.1 %1 %2\r\n").arg(status).arg(STATUS_CODES[status]).toLatin1());
+        QString("HTTP/1.1 %1 %2\r\n").arg(status).arg(QHttpServer::statusCodes()[status]).toLatin1());
     writeHeaders();
     m_connection->write("\r\n");
 

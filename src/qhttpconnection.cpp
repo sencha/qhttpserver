@@ -30,7 +30,6 @@
 #include "qhttpresponse.h"
 
 /// @cond nodoc
-
 QHttpConnection::QHttpConnection(QTcpSocket *socket, QObject *parent)
     : QObject(parent),
       m_socket(socket),
@@ -61,26 +60,30 @@ QHttpConnection::QHttpConnection(QTcpSocket *socket, QObject *parent)
 
 QHttpConnection::~QHttpConnection()
 {
-    delete m_socket;
 
-    free(m_parser);
-    m_parser = 0;
+    if ( m_parser != 0 ) {
+        free(m_parser);
+        m_parser = 0;
+    }
 
-    delete m_parserSettings;
-    m_parserSettings = 0;
+    if ( m_parserSettings != 0 ) {
+        delete m_parserSettings;
+        m_parserSettings = 0;
+    }
 }
 
 void QHttpConnection::socketDisconnected()
 {
-    deleteLater();
-
     if (m_request) {
-        if (m_request->successful())
-            return;
-
-        m_request->setSuccessful(false);
-        Q_EMIT m_request->end();
+        if ( !m_request->successful() ) {
+            // is the very next line redundant?
+            m_request->setSuccessful(false);
+            Q_EMIT m_request->end();
+        }
     }
+
+    m_socket->deleteLater(); // safely delete m_socket
+    deleteLater();
 }
 
 void QHttpConnection::updateWriteCount(qint64 count)

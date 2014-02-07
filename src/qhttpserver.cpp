@@ -22,18 +22,19 @@
 
 #include "qhttpserver.h"
 
-#include <QTcpServer>
 #include <QTcpSocket>
 #include <QVariant>
 #include <QDebug>
 
 #include "qhttpconnection.h"
 
-QHash<int, QString> STATUS_CODES;
 
-QHttpServer::QHttpServer(QObject *parent) : QObject(parent), m_tcpServer(0)
+struct StatusCodes
 {
-#define STATUS_CODE(num, reason) STATUS_CODES.insert(num, reason);
+    QHash<int, QString>     istatusHash;
+
+    StatusCodes() {
+#define STATUS_CODE(num, reason) istatusHash.insert(num, reason);
     // {{{
     STATUS_CODE(100, "Continue")
     STATUS_CODE(101, "Switching Protocols")
@@ -88,6 +89,15 @@ QHttpServer::QHttpServer(QObject *parent) : QObject(parent), m_tcpServer(0)
     STATUS_CODE(509, "Bandwidth Limit Exceeded")
     STATUS_CODE(510, "Not Extended") // RFC 2774
     // }}}
+    }
+};
+
+Q_GLOBAL_STATIC(StatusCodes, gStatusCodes)
+
+
+QHttpServer::QHttpServer(QObject *parent) : QTcpServer(parent)
+{
+    connect(this, SIGNAL(newConnection()), this, SLOT(newConnection()));
 }
 
 QHttpServer::~QHttpServer()
@@ -96,38 +106,19 @@ QHttpServer::~QHttpServer()
 
 void QHttpServer::newConnection()
 {
-    Q_ASSERT(m_tcpServer);
-
-    while (m_tcpServer->hasPendingConnections()) {
+    while (hasPendingConnections()) {
         QHttpConnection *connection =
-            new QHttpConnection(m_tcpServer->nextPendingConnection(), this);
+            new QHttpConnection(nextPendingConnection(), this);
         connect(connection, SIGNAL(newRequest(QHttpRequest *, QHttpResponse *)), this,
                 SIGNAL(newRequest(QHttpRequest *, QHttpResponse *)));
     }
 }
 
-bool QHttpServer::listen(const QHostAddress &address, quint16 port)
-{
-    Q_ASSERT(!m_tcpServer);
-    m_tcpServer = new QTcpServer(this);
-
-    bool couldBindToPort = m_tcpServer->listen(address, port);
-    if (couldBindToPort) {
-        connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
-    } else {
-        delete m_tcpServer;
-        m_tcpServer = NULL;
-    }
-    return couldBindToPort;
-}
-
 bool QHttpServer::listen(quint16 port)
 {
-    return listen(QHostAddress::Any, port);
+    return QTcpServer::listen(QHostAddress::Any, port);
 }
 
-void QHttpServer::close()
-{
-    if (m_tcpServer)
-        m_tcpServer->close();
+const TStatusCodes& QHttpServer::statusCodes() {
+    return gStatusCodes->istatusHash;
 }
