@@ -176,7 +176,7 @@ int QHttpConnection::MessageBegin(http_parser *parser)
 
     // The QHttpRequest should not be parented to this, since it's memory
     // management is the responsibility of the user of the library.
-    theConnection->m_request = new QHttpRequest(theConnection);
+    theConnection->m_request = new QHttpRequest(theConnection, theConnection);
     return 0;
 }
 
