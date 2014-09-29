@@ -27,6 +27,7 @@
 #include "qhttpserverfwd.h"
 
 #include <QObject>
+#include <QPointer>
 
 /// @cond nodoc
 
@@ -66,7 +67,7 @@ private:
     http_parser_settings *m_parserSettings;
 
     // Since there can only be one request at any time even with pipelining.
-    QHttpRequest *m_request;
+    QPointer<QHttpRequest> m_request;
 
     QByteArray m_currentUrl;
     // The ones we are reading in from the parser
