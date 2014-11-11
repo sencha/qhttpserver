@@ -62,7 +62,7 @@ private:
     static int MessageComplete(http_parser *parser);
 
 private:
-    QTcpSocket *m_socket;
+    QPointer<QTcpSocket> m_socket;
     http_parser *m_parser;
     http_parser_settings *m_parserSettings;
 
