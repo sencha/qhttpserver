@@ -67,11 +67,13 @@ public:
 
     virtual ~QHttpServer();
 
-    /// Starts the server on @c port listening on all interfaces.
-    /** @param port Port number on which the server should run.
-        @return True if the server was started successfully, false otherwise.
-        @sa listen(const QHostAddress&, quint16) */
-    bool listen(quint16 port);
+    /// Start the server by bounding to the given @c address and @c port.
+    /** @note This function returns immediately, it does not block.
+        @param address Address on which to listen to. Default is to listen on
+        all interfaces which means the server can be accessed from anywhere.
+        @param port Port number on which the server should run.
+        @return True if the server was started successfully, false otherwise.*/
+    bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 80);
 
 Q_SIGNALS:
     /// Emitted when a client makes a new request to the server.

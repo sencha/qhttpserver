@@ -61,12 +61,12 @@ QHttpConnection::QHttpConnection(QTcpSocket *socket, QObject *parent)
 QHttpConnection::~QHttpConnection()
 {
 
-    if ( m_parser != 0 ) {
+    if (m_parser != 0) {
         free(m_parser);
         m_parser = 0;
     }
 
-    if ( m_parserSettings != 0 ) {
+    if (m_parserSettings != 0) {
         delete m_parserSettings;
         m_parserSettings = 0;
     }
@@ -75,7 +75,7 @@ QHttpConnection::~QHttpConnection()
 void QHttpConnection::socketDisconnected()
 {
     if (m_request) {
-        if ( !m_request->successful() ) {
+        if (!m_request->successful()) {
             // is the very next line redundant?
             m_request->setSuccessful(false);
             Q_EMIT m_request->end();
